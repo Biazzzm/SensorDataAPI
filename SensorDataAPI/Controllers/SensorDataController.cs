@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SensorDataAPI.Services; 
+using SensorDataAPI.Services;
 using System.Threading.Tasks;
 
 namespace SensorDataAPI.Controllers
@@ -15,6 +15,12 @@ namespace SensorDataAPI.Controllers
             _telegramService = new TelegramService();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            return Ok("Ok");
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] SensorData data)
         {
@@ -25,7 +31,7 @@ namespace SensorDataAPI.Controllers
 
 Detectamos um nível de gás ou fumaça em sua área. Sua segurança é nossa prioridade!
 
-Deseja ligar para os serviços de emergência? Aqui estão os números, basta clicar em um deles:
+Deseja ligar para os serviços de emergência? Aqui estão os números:
 
 Polícia: 190
 Bombeiros: 193
@@ -35,9 +41,15 @@ Por favor, se sentir que está em risco, entre em contato imediatamente com os s
 Fique seguro(a)!";
 
                 await _telegramService.SendMessage(message);
+                return Ok(new { status = "Mensagem enviada com sucesso" });
+
+            }
+            else
+            {
+                return Ok(new { status = "Ta Safe" });
+
             }
 
-            return Ok(new { status = "Mensagem enviada com sucesso" });
         }
     }
 
