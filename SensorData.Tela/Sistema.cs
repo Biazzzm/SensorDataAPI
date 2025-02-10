@@ -19,13 +19,14 @@ namespace SensorData.Tela
             InitializeComponent();
             this.userId = userId;
             this.passwordLogin = passwordLogin;
+            MessageBox.Show($"UserId carregado com sucesso: {userId}");
             CarregarUsuario();
             senhaCheckBox1.CheckedChanged += senhaCheckBox1_CheckedChanged;
             Console.WriteLine($"userId recebido: {userId}\n senha recebida: {passwordLogin}");
             CarregarContatosEmergencia(userId);
-            CarregarAlertas(userId);
+            CarregarAlertas(userId).Wait(); // Carrega os alertas ao iniciar o formulário
+            AdicionarAlerta();
         }
-
         private void CarregarUsuario()
         {
             try
@@ -443,9 +444,9 @@ namespace SensorData.Tela
 
         private void dataGridView2_Load(object sender, DataGridViewCellEventArgs e)
         {
-            CarregarAlertas(userId);
+            CarregarAlertas(userId).Wait();
         }
-        private async Task CarregarAlertas(int UserId)
+        private async Task CarregarAlertas(int userId)
         {
             try
             {
@@ -460,9 +461,16 @@ namespace SensorData.Tela
                         var responseBody = response.Content.ReadAsStringAsync().Result;
                         var alertas = JsonSerializer.Deserialize<List<AlertaModel>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                        // Agora você pode associar os alertas ao seu DataGrid
+                        // Verifica se a lista de alertas é nula ou vazia
+                        if (alertas == null || !alertas.Any())
+                        {
+                            alertas = new List<AlertaModel>(); // Cria uma lista vazia
+                        }
+
+                        // Atualiza o DataGrid com a lista de alertas
                         dataGridView2.DataSource = new BindingList<AlertaModel>(alertas);
 
+                        // Oculta colunas desnecessárias
                         if (dataGridView2.Columns.Contains("UserId"))
                         {
                             dataGridView2.Columns["UserId"].Visible = false;
@@ -472,12 +480,10 @@ namespace SensorData.Tela
                         {
                             dataGridView2.Columns["User"].Visible = false;
                         }
-
-
                     }
                     else
                     {
-                        MessageBox.Show("Erro ao carregar alertas." + response.ReasonPhrase);
+                        MessageBox.Show("Erro ao carregar alertas: " + response.ReasonPhrase);
                     }
                 }
             }
@@ -488,6 +494,24 @@ namespace SensorData.Tela
         }
 
         
+
+        private async void AdicionarAlerta()
+        {
+            try
+            {
+                // Atualiza o DataGrid com os alertas mais recentes
+                await CarregarAlertas(userId);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao atualizar alertas: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            AdicionarAlerta();
+        }
     }
 }
     

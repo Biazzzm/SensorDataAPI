@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SensorData.Data;
 using SensorData.Models;
 using SensorDataAPI.Services;
+using Telegram.Bot.Types;
 
 namespace SensorDataAPI.Controllers
 {
@@ -14,10 +15,12 @@ namespace SensorDataAPI.Controllers
         private static DateTime _lastAlertTime = DateTime.MinValue; // Variável para controlar o tempo do último alerta
         private static readonly TimeSpan CooldownPeriod = TimeSpan.FromMinutes(5); // Período de cooldown para novos alertas
         private readonly SensorDBcontext _context;
-        public SensorDataController(SensorDBcontext context)
+        private readonly EmailService _emailService;
+        public SensorDataController(SensorDBcontext context, EmailService emailService)
         {
             _telegramService = new TelegramService();
             _context = context;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -28,33 +31,29 @@ namespace SensorDataAPI.Controllers
         }
 
         [HttpPost]
-        [Route("api/SensorData/post-sensor-data/{email}")]
-        public async Task<IActionResult> Post([FromRoute] string email, [FromBody] SensorModel data, [FromServices] SensorDBcontext _context)
+        [Route("api/sensordata/post-sensor-data/{email}")]
+        public async Task<IActionResult> Post([FromRoute] string email, [FromBody] SensorModel data, [FromServices] SensorDBcontext _context, [FromServices] EmailService _emailService)
         {
             try
             {
-                // Encontre o userId com base no e-mail
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                // Carrega o usuário e seus contatos de emergência
+                var user = await _context.Users
+                    .Include(u => u.ContactsList) // Carrega os contatos de emergência
+                    .FirstOrDefaultAsync(u => u.Email == email);
 
                 if (user == null)
                 {
                     return BadRequest("Usuário não encontrado com esse e-mail.");
                 }
 
-                // Agora você tem o userId
                 int userId = user.Id;
-
-                // Atribuindo o objeto do usuário no SensorModel
                 data.User = user;
-                data.UserId = userId; // O UserId ainda é necessário para relacionar com outras tabelas, como Alertas
+                data.UserId = userId;
 
-                // Verifica se o valor do sensor é maior que 400 (indicando presença de fumaça)
                 if (data.SensorValue > 400)
                 {
-                    // Verifica se já passou o tempo de cooldown ou se nunca enviou alerta
                     if (DateTime.Now - _lastAlertTime > CooldownPeriod)
                     {
-                        // Cria um alerta para esse sensor
                         var alerta = new AlertaModel
                         {
                             SensorValue = data.SensorValue,
@@ -62,12 +61,12 @@ namespace SensorDataAPI.Controllers
                             UserId = userId
                         };
 
-                        // Salva o alerta no banco de dados
                         _context.Alertas.Add(alerta);
                         await _context.SaveChangesAsync();
 
-                        // Mensagem de alerta para o Telegram
-                        var message = @$"🚨 Alerta de Gás ou Fumaça Detectada! 🚨
+                        var message = @$"🚨 Alerta de Gás ou Fumaça Detectada!
+
+Olá {user.Name}, 
 
 Detectamos um nível de gás ou fumaça em sua área. Sua segurança é nossa prioridade!
 
@@ -80,10 +79,21 @@ Por favor, se sentir que está em risco, entre em contato imediatamente com os s
 
 Fique seguro(a)!";
 
-                        // Envia a mensagem para o Telegram
-                        await _telegramService.SendMessage(message);
+                        var chatIds = new List<string> { user.ChatId };
+                        if (user.ContactsList != null)
+                        {
+                            chatIds.AddRange(user.ContactsList.Where(c => !string.IsNullOrEmpty(c.ChatId)).Select(c => c.ChatId));
+                        }
 
-                        // Atualiza o tempo do último alerta enviado
+                        await _telegramService.SendAlertMessageAsync(message, chatIds);
+
+                        // Prepara a lista de usuários e contatos
+                        var users = new List<UserModel> { user };
+                        var contacts = user.ContactsList?.ToList() ?? new List<ContactModel>();
+
+                        // Envia o e-mail para todos os destinatários
+                        await _emailService.SendEmailAsync(users, contacts, "🚨 Alerta de Gás ou Fumaça Detectada!", message);
+
                         _lastAlertTime = DateTime.Now;
 
                         return Ok(new { status = "Alerta enviado e dados salvos com sucesso." });
@@ -98,16 +108,11 @@ Fique seguro(a)!";
                     return Ok(new { status = "Valor do sensor não crítico, dados não salvos." });
                 }
             }
-
             catch (Exception ex)
             {
                 return BadRequest("Erro ao processar dados: " + ex.Message);
             }
         }
-
-
-
     }
 }
-
 

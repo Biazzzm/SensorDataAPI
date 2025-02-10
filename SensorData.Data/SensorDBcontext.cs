@@ -32,7 +32,7 @@ namespace SensorData.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=localhost;Database=CheiroDeProblema;User Id=sa;Password=1q2w3e4r@#$;TrustServerCertificate=True");
+                optionsBuilder.UseInMemoryDatabase("Cheiro de Problema");
             }
         }
     }
