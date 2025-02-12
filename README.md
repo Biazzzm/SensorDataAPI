@@ -16,7 +16,7 @@ Este repositório contém a API que recebe e processa dados do sensor MQ-2, incl
 1. Clone o repositório para o seu computador:
 
     ```bash
-    git clone[https://github.com/seu-usuario/SensorDataAPI.git]
+    git clone[https://github.com/Biazzzm/SensorDataAPI.git]
     cd SensorDataAPI
     ```
 
