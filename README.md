@@ -1,67 +1,50 @@
-Projeto de Monitoramento de Gás e Fumaça com Arduino e ESP8266
+# SensorDataAPI
 
-Descrição:
-Este projeto é uma solução de monitoramento de gás e fumaça utilizando o Arduino Uno Wi-Fi, ESP8266, e o sensor MQ-2. A solução envia dados do sensor para uma API hospedada na AWS, e aciona alertas visuais e sonoros em caso de detecção de fumaça ou gás. As lâmpadas Yeelight conectadas via Wi-Fi alteram suas cores como parte do alerta, mudando entre vermelho e branco.
+Este repositório contém a API que recebe e processa dados do sensor MQ-2, incluindo informações de gás e fumaça enviadas por dispositivos Arduino. A API é responsável por registrar os dados enviados pelo sensor, bem como associar essas informações ao e-mail do usuário para rastreamento e notificações.
 
-O sistema também permite a configuração de IPs das lâmpadas e do e-mail do usuário através de um ponto de acesso gerado pela placa ESP8266.
+## Funcionalidades
 
-Funcionalidades:
-Detecção de Gás/Fumaça: Utiliza o sensor MQ-2 para detectar a presença de fumaça ou gases perigosos.
-Alerta Sonoro: Buzzer emite um som intermitente quando a fumaça é detectada.
-Alerta Visual: LEDs e lâmpadas Yeelight mudam de cor em resposta ao sensor.
-Integração com API: Envio de dados do sensor para uma API na AWS, que registra a detecção e envia notificações.
-Configuração via Ponto de Acesso: A placa ESP8266 cria um ponto de acesso Wi-Fi (ESP8266_Config) para que o usuário possa informar os IPs das lâmpadas e o e-mail para associar o sistema ao usuário.
-Como Funciona
-Configuração do Wi-Fi: Ao ligar o dispositivo, ele cria uma rede Wi-Fi chamada ESP8266_Config. O usuário conecta-se a essa rede e informa os IPs das lâmpadas Yeelight (até 5 lâmpadas) e o e-mail utilizado para criar o cadastro.
+- **Recebe Dados de Sensores**: A API recebe dados do sensor MQ-2 (gás e fumaça) enviados pelo Arduino, junto com o e-mail do usuário.
+- **Armazenamento e Processamento**: A API armazena os dados no banco de dados em memória e realiza o processamento necessário para a geração de alertas ou registros.
+- **Notificação**: Possibilidade de enviar notificações para o usuário caso um valor crítico de sensor seja detectado.
+- **Integração com o Sistema de Lâmpadas**: Integra-se ao sistema de lâmpadas Yeelight, alterando as cores em resposta aos dados recebidos do sensor.
 
-Leitura de Dados do Sensor: O código na placa Arduino monitora o valor do sensor MQ-2. Quando o valor ultrapassa o limite preestabelecido, a placa ativa os alertas (sonoro e visual).
+## Como Executar a API
 
-Enviando Dados para a API: Quando o valor do sensor ultrapassa o limite, os dados são enviados para a API. A API registra a detecção e armazena o e-mail do usuário junto aos dados do sensor.
+### Instalação
 
-Alteração das Cores das Lâmpadas: As lâmpadas Yeelight conectadas mudam de cor entre vermelho e branco em resposta à detecção de fumaça.
+1. Clone o repositório para o seu computador:
 
-Tela de Configuração (Interface Windows Forms)
-O projeto inclui uma interface Windows Forms para o usuário configurar as lâmpadas. Nela, é possível:
+    ```bash
+    git clone[https://github.com/seu-usuario/SensorDataAPI.git]
+    cd SensorDataAPI
+    ```
 
-Informar os IPs das lâmpadas Yeelight.
-Associar o sistema ao e-mail do usuário.
-Monitorar os alertas gerados pelo sensor em tempo real.
-Como Executar
-Carregar o Código na Placa
+2. Instale as dependências:
 
-Faça o upload do código da Placa Uno Wi-Fi e ESP8266 usando a IDE do Arduino.
-Para o código da placa Uno, configure as Chaves 3 e 4 no modo ON.
-Para o código do ESP8266, configure as Chaves 5, 6 e 7 no modo ON.
-Deixe as Chaves 1, 2 e 5 no modo ON para permitir que os dois códigos se comuniquem corretamente.
-Conectar-se à Rede Wi-Fi:
+    ```bash
+    npm install
+    ```
 
-Conecte-se ao ponto de acesso gerado pela placa, ESP8266_Config.
-Abra o portal de configuração para informar os IPs das lâmpadas e o e-mail.
-Configuração da Interface Windows Forms:
+3. Inicie a API:
 
-Inicie a interface Windows Forms para visualizar e configurar as lâmpadas.
-Monitoramento em Tempo Real:
+    ```bash
+    npm start
+    ```
 
-Ao detectar fumaça ou gás, os alertas serão gerados visualmente e sonoramente. As lâmpadas Yeelight mudarão de cor e o sistema enviará os dados para a API.
-Requisitos
-Arduino Uno Wi-Fi (Atmega328).
-ESP8266.
-Sensor MQ-2.
-Lâmpadas Yeelight (modelo E27, Wi-Fi).
-IDE do Arduino.
-Bibliotecas para ESP8266 e Arduino.
-Software Windows Forms.
-Tecnologias Utilizadas
-Arduino (Linguagem C).
-ESP8266 (Linguagem C++).
-API (Node.js, hospedada na AWS).
-Windows Forms (C#).
-Como Contribuir
-Faça um fork deste repositório.
-Crie uma branch para a sua feature ou correção (git checkout -b feature/MinhaFeature).
-Faça o commit das suas alterações (git commit -am 'Adicionando nova feature').
-Push para a branch (git push origin feature/MinhaFeature).
-Abra um pull request.
-Licença
-Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para mais detalhes.
+### Endpoints
+
+A API possui o seguinte endpoint principal:
+
+- **POST /api/sensordata/post-sensor-data/{email}**  
+  Recebe os dados do sensor MQ-2 e o e-mail do usuário.
+
+  **Corpo da requisição**:
+  ```json
+  {
+   "id": 0,
+  "sensorValue": 0,
+  "userId": 0,
+  "timestamp": "2025-02-12T19:17:04.635Z"
+  }
 
