@@ -1,14 +1,10 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Crypto.Generators;
 using SecureIdentity.Password;
 using SensorData.Data;
 using SensorData.Models;
 using SensorDataAPI.EditorViewModel;
 using SensorDataAPI.ViewModels;
-using Telegram.Bot.Types;
 
 
 namespace SensorDataAPI.Controllers
@@ -83,7 +79,14 @@ namespace SensorDataAPI.Controllers
                     Name = model.Name,
                     Email = model.Email,
                     Password = PasswordHasher.Hash(model.Password),
+                    ChatId = model.ChatId,
                 };
+
+                if (_context.Users.Any(u => u.Email == user.Email))
+                {
+                    return BadRequest("Já existe um usuário com este e-mail.");
+                }
+
 
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();

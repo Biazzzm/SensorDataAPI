@@ -60,7 +60,7 @@ namespace SensorData.Tela
         {
             try
             {
-                string url = "https://localhost:7155/v1/api/users";
+                string url = "http://apicheiro-dev.eba-bctbmw7j.us-east-1.elasticbeanstalk.com/v1/api/users";
 
                 var user = new UserModel
                 {

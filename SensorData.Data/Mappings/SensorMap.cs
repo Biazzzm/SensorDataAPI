@@ -32,6 +32,10 @@ namespace SensorData.Data.Mappings
             builder.Property(x => x.UserId)
                 .IsRequired();
 
+            builder.Property(x => x.SensorType)
+              .HasMaxLength(10)
+              .IsRequired();
+
             // Relacionamento com UserModel
             builder.HasOne(x => x.User) // Cada Sensor tem um User
                 .WithMany() // Não estamos mantendo uma coleção de sensores no UserModel

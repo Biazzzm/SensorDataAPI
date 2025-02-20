@@ -28,7 +28,7 @@ builder.Services.AddTransient<EmailService>();
 
 builder.Services.AddSingleton<TelegramService>();
 
-builder.Services.AddHostedService<TelegramPollingService>();
+//builder.Services.AddHostedService<TelegramPollingService>();
 
 // Configuração do EmailService
 

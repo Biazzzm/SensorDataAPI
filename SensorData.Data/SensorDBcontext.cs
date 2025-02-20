@@ -22,6 +22,7 @@ namespace SensorData.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<UserModel>().HasIndex(x => x.Email).IsUnique();
             // Aplica todas as configurações do assembly (o que inclui as classes de mapeamento)
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(SensorDBcontext).Assembly);
         }

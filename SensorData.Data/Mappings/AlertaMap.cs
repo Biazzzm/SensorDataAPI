@@ -29,6 +29,10 @@ namespace SensorData.Data.Mappings
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Adicionando o mapeamento da nova propriedade SensorType
+            builder.Property(x => x.SensorType)
+                .HasColumnType("nvarchar(50)") // Ou "varchar(50)" dependendo do banco de dados
+                .IsRequired();
 
         }
     }

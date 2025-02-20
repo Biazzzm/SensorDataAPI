@@ -6,48 +6,54 @@ using System.Threading.Tasks;
 
 namespace SensorDataAPI.Services
 {
-    public class TelegramPollingService : BackgroundService
-    {
-        private readonly TelegramService _telegramService;
-        private readonly string _botToken = "7810065799:AAGmfARU101WuwJ6M8CPmJ_0hdhcfv-psK8";
+//    public class TelegramPollingService : BackgroundService
+//    {
+//        private readonly TelegramService _telegramService;
+//        private readonly string _botToken = "7810065799:AAGmfARU101WuwJ6M8CPmJ_0hdhcfv-psK8";
 
-        public TelegramPollingService(TelegramService telegramService)
-        {
-            _telegramService = telegramService;
-        }
+//        public TelegramPollingService(TelegramService telegramService)
+//        {
+//            _telegramService = telegramService;
+//        }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            int lastUpdateId = 0;
+//        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+//        {
+//            throw new NotImplementedException();
+//        }
 
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                using HttpClient client = new HttpClient();
-                var url = $"https://api.telegram.org/bot{_botToken}/getUpdates?offset={lastUpdateId + 1}";
-                var response = await client.GetStringAsync(url);
+//        //protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+//        //{
+//        //    int lastUpdateId = 0;
 
-                var updates = JObject.Parse(response)["result"];
+//        //    while (!stoppingToken.IsCancellationRequested)
+//        //    {
+//        //        using HttpClient client = new HttpClient();
+//        //        var url = $"https://api.telegram.org/bot{_botToken}/getUpdates?offset={lastUpdateId + 1}";
+//        //        var response = await client.GetStringAsync(url);
 
-                foreach (var update in updates)
-                {
-                    var message = update["message"];
-                    if (message != null)
-                    {
-                        long chatId = message["chat"]["id"].Value<long>();
-                        string text = message["text"].Value<string>();
+//        //        var updates = JObject.Parse(response)["result"];
 
-                        // Exibe o chatId no console para facilitar o teste
-                        Console.WriteLine($"Novo chatId capturado: {chatId}");
+//        //        foreach (var update in updates)
+//        //        {
+//        //            var message = update["message"];
+//        //            if (message != null)
+//        //            {
+//        //                long chatId = message["chat"]["id"].Value<long>();
+//        //                string text = message["text"].Value<string>();
 
-                        // Chama o método para tratar o comando
-                        await _telegramService.HandleCommandAsync(text, chatId);
-                    }
+//        //                // Exibe o chatId no console para facilitar o teste
+//        //                Console.WriteLine($"Novo chatId capturado: {chatId}");
 
-                    lastUpdateId = update["update_id"].Value<int>();
-                }
+//        //                // Chama o método para tratar o comando
+//        //                await _telegramService.HandleCommandAsync(text, chatId);
+//        //            }
 
-                await Task.Delay(1000); // Evita sobrecarregar o servidor
-            }
-        }
-    }
+//        //            lastUpdateId = update["update_id"].Value<int>();
+//        //        }
+
+//        //        await Task.Delay(1000); // Evita sobrecarregar o servidor
+//        //    }
+//    }
 }
+
+

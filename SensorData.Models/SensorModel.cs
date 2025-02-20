@@ -11,5 +11,8 @@ namespace SensorData.Models
 
         [JsonIgnore]
         public UserModel? User { get; set; }
+
+        // Adicionando a propriedade para diferenciar MQ-2 e MQ-4
+        public string SensorType { get; set; }
     }
 }

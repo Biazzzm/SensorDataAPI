@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using SensorData.Data;
 using SensorData.Models;
 using SensorDataAPI.Services;
-using Telegram.Bot.Types;
 
 namespace SensorDataAPI.Controllers
 {
@@ -32,13 +31,16 @@ namespace SensorDataAPI.Controllers
 
         [HttpPost]
         [Route("api/sensordata/post-sensor-data/{email}")]
-        public async Task<IActionResult> Post([FromRoute] string email, [FromBody] SensorModel data, [FromServices] SensorDBcontext _context, [FromServices] EmailService _emailService)
+        public async Task<IActionResult> Post(
+    [FromRoute] string email,
+    [FromBody] SensorModel data,
+    [FromServices] SensorDBcontext _context,
+    [FromServices] EmailService _emailService)
         {
             try
             {
-                // Carrega o usuário e seus contatos de emergência
                 var user = await _context.Users
-                    .Include(u => u.ContactsList) // Carrega os contatos de emergência
+                    .Include(u => u.ContactsList)
                     .FirstOrDefaultAsync(u => u.Email == email);
 
                 if (user == null)
@@ -46,11 +48,32 @@ namespace SensorDataAPI.Controllers
                     return BadRequest("Usuário não encontrado com esse e-mail.");
                 }
 
-                int userId = user.Id;
-                data.User = user;
-                data.UserId = userId;
+                if (string.IsNullOrEmpty(data.SensorType))
+                {
+                    return BadRequest("O tipo de sensor não foi informado.");
+                }
 
-                if (data.SensorValue > 400)
+                if (data.SensorType != "MQ-2" && data.SensorType != "MQ-4")
+                {
+                    return BadRequest("Tipo de sensor inválido.");
+                }
+
+                data.User = user;
+                data.UserId = user.Id;
+
+                // Verifica o tipo de sensor e aplica a condição de valor do sensor
+                int sensorThreshold = 0;
+
+                if (data.SensorType == "MQ-2")
+                {
+                    sensorThreshold = 400; // Limite para MQ-2
+                }
+                else if (data.SensorType == "MQ-4")
+                {
+                    sensorThreshold = 300; // Limite para MQ-4
+                }
+
+                if (data.SensorValue > sensorThreshold)
                 {
                     if (DateTime.Now - _lastAlertTime > CooldownPeriod)
                     {
@@ -58,24 +81,18 @@ namespace SensorDataAPI.Controllers
                         {
                             SensorValue = data.SensorValue,
                             DataHora = DateTime.UtcNow,
-                            UserId = userId
+                            UserId = user.Id,
+                            SensorType = data.SensorType // Armazenando qual sensor disparou o alerta
                         };
 
                         _context.Alertas.Add(alerta);
                         await _context.SaveChangesAsync();
 
-                        var message = @$"🚨 Alerta de Gás ou Fumaça Detectada!
+                        var message = @$"🚨 Alerta de {data.SensorType} Detectado!
 
 Olá {user.Name}, 
 
-Detectamos um nível de gás ou fumaça em sua área. Sua segurança é nossa prioridade!
-
-Deseja ligar para os serviços de emergência? Aqui estão os números:
-
-Polícia: 190  
-Bombeiros: 193  
-
-Por favor, se sentir que está em risco, entre em contato imediatamente com os serviços de emergência.
+Detectamos um nível de gás ou fumaça em sua área pelo sensor {data.SensorType}. Sua segurança é nossa prioridade!
 
 Fique seguro(a)!";
 
@@ -87,16 +104,14 @@ Fique seguro(a)!";
 
                         await _telegramService.SendAlertMessageAsync(message, chatIds);
 
-                        // Prepara a lista de usuários e contatos
                         var users = new List<UserModel> { user };
                         var contacts = user.ContactsList?.ToList() ?? new List<ContactModel>();
 
-                        // Envia o e-mail para todos os destinatários
                         await _emailService.SendEmailAsync(users, contacts, "🚨 Alerta de Gás ou Fumaça Detectada!", message);
 
                         _lastAlertTime = DateTime.Now;
 
-                        return Ok(new { status = "Alerta enviado e dados salvos com sucesso." });
+                        return Ok(new { status = $"Alerta do {data.SensorType} enviado e dados salvos com sucesso." });
                     }
                     else
                     {
@@ -105,7 +120,7 @@ Fique seguro(a)!";
                 }
                 else
                 {
-                    return Ok(new { status = "Valor do sensor não crítico, dados não salvos." });
+                    return Ok(new { status = $"Valor do {data.SensorType} não crítico, dados não salvos." });
                 }
             }
             catch (Exception ex)

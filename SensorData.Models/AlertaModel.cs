@@ -23,5 +23,11 @@ namespace SensorData.Models
 
         //[InverseProperty("AlertasList")]
         public UserModel User { get; set; }
+
+        // Novo campo para armazenar o tipo do sensor (MQ-2 ou MQ-4)
+        [Required]
+        public string SensorType { get; set; }
+
+
     }
 }
