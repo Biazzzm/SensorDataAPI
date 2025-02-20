@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SensorData.Data;
 using SensorData.Models;
 using SensorDataAPI.Services;
+using Telegram.Bot.Types;
 
 namespace SensorDataAPI.Controllers
 {
@@ -48,33 +49,38 @@ namespace SensorDataAPI.Controllers
                     return BadRequest("Usuário não encontrado com esse e-mail.");
                 }
 
+                int userId = user.Id;
+                data.User = user;
+                data.UserId = userId;
+
                 if (string.IsNullOrEmpty(data.SensorType))
                 {
                     return BadRequest("O tipo de sensor não foi informado.");
                 }
 
-                if (data.SensorType != "MQ-2" && data.SensorType != "MQ-4")
+               
+                // Definir os limites para os sensores MQ-2 e MQ-4
+                int mq2Threshold = 400;  // Limite para MQ-2
+                int mq4Threshold = 300;  // Limite para MQ-4
+
+                bool alertTriggered = false;
+
+                
+
+                // Verificar o valor do sensor com base no tipo
+                if (data.SensorType == "MQ-2" && data.SensorValue > mq2Threshold)
                 {
-                    return BadRequest("Tipo de sensor inválido.");
+                    alertTriggered = true;
+                }
+                else if (data.SensorType == "MQ-4" && data.SensorValue > mq4Threshold)
+                {
+                    alertTriggered = true;
                 }
 
-                data.User = user;
-                data.UserId = user.Id;
-
-                // Verifica o tipo de sensor e aplica a condição de valor do sensor
-                int sensorThreshold = 0;
-
-                if (data.SensorType == "MQ-2")
+                // Se algum sensor disparou alerta, enviar o alerta
+                if (alertTriggered)
                 {
-                    sensorThreshold = 400; // Limite para MQ-2
-                }
-                else if (data.SensorType == "MQ-4")
-                {
-                    sensorThreshold = 300; // Limite para MQ-4
-                }
-
-                if (data.SensorValue > sensorThreshold)
-                {
+                    // Verificar se o tempo de cooldown foi respeitado
                     if (DateTime.Now - _lastAlertTime > CooldownPeriod)
                     {
                         var alerta = new AlertaModel
@@ -90,11 +96,19 @@ namespace SensorDataAPI.Controllers
 
                         var message = @$"🚨 Alerta de {data.SensorType} Detectado!
 
-Olá {user.Name}, 
+                        Nível crítico detectado: {data.SensorValue}.
+                        
+                        Olá {user.Name}, Detectamos um nível de gás ou fumaça em sua área. Sua segurança é nossa prioridade!
 
-Detectamos um nível de gás ou fumaça em sua área pelo sensor {data.SensorType}. Sua segurança é nossa prioridade!
 
-Fique seguro(a)!";
+                        Deseja ligar para os serviços de emergência? Aqui estão os números:
+
+                        Polícia: 190
+                        Bombeiros: 193
+
+                        Por favor, se sentir que está em risco, entre em contato imediatamente com os serviços de emergência.
+
+                        Fique seguro(a)!";
 
                         var chatIds = new List<string> { user.ChatId };
                         if (user.ContactsList != null)
@@ -111,7 +125,7 @@ Fique seguro(a)!";
 
                         _lastAlertTime = DateTime.Now;
 
-                        return Ok(new { status = $"Alerta do {data.SensorType} enviado e dados salvos com sucesso." });
+                        return Ok(new { status = "Alerta enviado e dados salvos com sucesso." });
                     }
                     else
                     {
@@ -120,7 +134,7 @@ Fique seguro(a)!";
                 }
                 else
                 {
-                    return Ok(new { status = $"Valor do {data.SensorType} não crítico, dados não salvos." });
+                    return Ok(new { status = "Nenhum valor crítico detectado. Dados não salvos." });
                 }
             }
             catch (Exception ex)
@@ -128,6 +142,7 @@ Fique seguro(a)!";
                 return BadRequest("Erro ao processar dados: " + ex.Message);
             }
         }
+
     }
 }
 

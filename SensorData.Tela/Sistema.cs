@@ -107,9 +107,6 @@ namespace SensorData.Tela
                 };
                 dataGridView1.Columns.Add(saveButtonColumn);
             }
-
-
-
         }
 
         public async Task<bool> UpdateAsync(int userId, string name, string email, string password, string ChatId)
@@ -598,7 +595,6 @@ namespace SensorData.Tela
                 return new List<AlertaModel>(); // Retorna uma lista vazia em caso de erro
             }
         }
-
        
     }
 }
