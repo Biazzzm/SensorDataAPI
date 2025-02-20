@@ -61,7 +61,7 @@ namespace SensorDataAPI.Controllers
                
                 // Definir os limites para os sensores MQ-2 e MQ-4
                 int mq2Threshold = 400;  // Limite para MQ-2
-                int mq4Threshold = 300;  // Limite para MQ-4
+                int mq4Threshold = 400;  // Limite para MQ-4
 
                 bool alertTriggered = false;
 
