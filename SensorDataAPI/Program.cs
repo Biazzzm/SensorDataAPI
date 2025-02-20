@@ -30,7 +30,7 @@ builder.Services.AddSingleton<TelegramService>();
 
 builder.Services.AddHostedService<TelegramPollingService>();
 
-Configuração do EmailService
+//Configuração do EmailService
 
 
 var app = builder.Build();

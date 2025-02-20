@@ -10,7 +10,7 @@ namespace SensorDataAPI.Services
     public class TelegramPollingService : BackgroundService
     {
         private readonly TelegramService _telegramservice;
-        private readonly string _bottoken = "7810065799:aagmfaru101wuwj6m8cpmj_0hdhcfv-psk8";
+        private readonly string _botToken = "7810065799:AAGmfARU101WuwJ6M8CPmJ_0hdhcfv-psK8";
 
         public TelegramPollingService(TelegramService telegramservice)
         {
@@ -24,8 +24,9 @@ namespace SensorDataAPI.Services
 
             while (!stoppingtoken.IsCancellationRequested)
             {
+
                 using HttpClient client = new HttpClient();
-                var url = $"https://api.telegram.org/bot{_bottoken}/getupdates?offset={lastupdateid + 1}";
+                var url = $"https://api.telegram.org/bot{_botToken}/getupdates?offset={lastupdateid + 1}";
                 var response = await client.GetStringAsync(url);
 
                 var updates = JObject.Parse(response)["result"];
