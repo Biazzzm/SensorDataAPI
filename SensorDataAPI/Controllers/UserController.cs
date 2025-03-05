@@ -62,7 +62,7 @@ namespace SensorDataAPI.Controllers
 
         }
 
-        
+
 
         [HttpPost]
         [Route("v1/api/users")]
@@ -120,6 +120,8 @@ namespace SensorDataAPI.Controllers
                 usuarioExistente.Name = model.Name;
                 usuarioExistente.Email = model.Email;
                 usuarioExistente.Password = PasswordHasher.Hash(model.Password);
+                usuarioExistente.ChatId = model.ChatId;
+
 
                 // Verifica se a senha foi alterada antes de criptografá-la
                 if (!string.IsNullOrEmpty(model.Password))
@@ -127,7 +129,6 @@ namespace SensorDataAPI.Controllers
                     usuarioExistente.Password = PasswordHasher.Hash(model.Password);
                 }
 
-                usuarioExistente.ChatId = model.ChatId;
 
                 _context.Users.Update(usuarioExistente);
                 await _context.SaveChangesAsync();
