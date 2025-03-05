@@ -79,8 +79,14 @@ namespace SensorDataAPI.Controllers
                     Name = model.Name,
                     Email = model.Email,
                     Password = PasswordHasher.Hash(model.Password),
-                    ChatId = model.ChatId
+                    ChatId = model.ChatId,
                 };
+
+                if (_context.Users.Any(u => u.Email == user.Email))
+                {
+                    return BadRequest("Já existe um usuário com este e-mail.");
+                }
+
 
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();

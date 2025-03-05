@@ -40,7 +40,7 @@ namespace SensorData.Tela
         {
             try
             {
-                string url = "https://127.0.0.1:7155/v1/api/users/login";
+                string url = "http://apicheiro-dev.eba-bctbmw7j.us-east-1.elasticbeanstalk.com/v1/api/users/login";
 
                 var loginModel = new LoginViewModel { Email = email, Password = senha };
 

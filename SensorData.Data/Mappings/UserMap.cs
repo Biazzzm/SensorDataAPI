@@ -27,6 +27,9 @@ namespace SensorData.Data.Mappings
                 .HasColumnType("nvarchar(100)")
                 .IsRequired();
 
+            builder.HasIndex(x => x.Email)
+                .IsUnique();    
+
             builder.Property(x => x.Password)
                 .HasColumnType("nvarchar(255)") // Tamanho do campo para a senha
                 .IsRequired();

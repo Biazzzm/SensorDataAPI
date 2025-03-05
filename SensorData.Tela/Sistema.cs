@@ -1,11 +1,12 @@
-﻿using SensorData.Models;
-using System;
+﻿using Newtonsoft.Json;
+using SensorData.Models;
 using System.ComponentModel;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
-using System.Security.Policy;
 using System.Text;
 using System.Text.Json;
+using System.Windows.Forms.DataVisualization.Charting;
+using System.IO.Ports;
 
 namespace SensorData.Tela
 {
@@ -13,6 +14,7 @@ namespace SensorData.Tela
     {
         private int userId;
         private string passwordLogin;
+       
 
         public SistemaForm(int userId, string passwordLogin)
         {
@@ -24,14 +26,19 @@ namespace SensorData.Tela
             senhaCheckBox1.CheckedChanged += senhaCheckBox1_CheckedChanged;
             Console.WriteLine($"userId recebido: {userId}\n senha recebida: {passwordLogin}");
             CarregarContatosEmergencia(userId);
-            CarregarAlertas(userId).Wait(); // Carrega os alertas ao iniciar o formulário
-            AdicionarAlerta();
+           
+
         }
+
+        
+
+
+
         private void CarregarUsuario()
         {
             try
             {
-                string url = $"https://127.0.0.1:7155/v1/api/users/{userId}";
+                string url = $"http://apicheiro-dev.eba-bctbmw7j.us-east-1.elasticbeanstalk.com/v1/api/users/{userId}";
 
                 HttpClientHandler handler = new HttpClientHandler
                 {
@@ -56,7 +63,7 @@ namespace SensorData.Tela
                             PropertyNameCaseInsensitive = true
                         };
 
-                        var user = JsonSerializer.Deserialize<UserModel>(responseBody, options);
+                        var user = System.Text.Json.JsonSerializer.Deserialize<UserModel>(responseBody, options);
 
                         if (user != null)
                         {
@@ -108,14 +115,11 @@ namespace SensorData.Tela
                 };
                 dataGridView1.Columns.Add(saveButtonColumn);
             }
-
-
-
         }
 
         public async Task<bool> UpdateAsync(int userId, string name, string email, string password, string ChatId)
         {
-            string url = $"https://127.0.0.1:7155/v1/api/users/{userId}";
+            string url = $"http://apicheiro-dev.eba-bctbmw7j.us-east-1.elasticbeanstalk.com/v1/api/users/{userId}";
 
             // Aqui você pode obter a senha atual do usuário para usá-la caso o campo de senha esteja vazio
             string senhaAtual = ""; // Carregar a senha atual do usuário de algum lugar ou usar a senha salva
@@ -143,7 +147,7 @@ namespace SensorData.Tela
                     ChatId = ChatId
                 };
 
-                var json = JsonSerializer.Serialize(user);
+                var json = System.Text.Json.JsonSerializer.Serialize(user);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 var response = client.PutAsync(url, content).Result;
@@ -178,7 +182,7 @@ namespace SensorData.Tela
 
         private void CarregarContatosEmergencia(int UserId)
         {
-            var url = $"https://localhost:7155/v1/api/contacts/{UserId}";
+            var url = $"http://apicheiro-dev.eba-bctbmw7j.us-east-1.elasticbeanstalk.com/v1/api/contacts/{UserId}";
 
             HttpClientHandler handler = new HttpClientHandler
             {
@@ -203,7 +207,7 @@ namespace SensorData.Tela
                         PropertyNameCaseInsensitive = true
                     };
 
-                    List<ContactModel> contatos = JsonSerializer.Deserialize<List<ContactModel>>(responseBody, options);
+                    List<ContactModel> contatos = System.Text.Json.JsonSerializer.Deserialize<List<ContactModel>>(responseBody, options);
 
                     var bindingList = new BindingList<ContactModel>(contatos);
                     dataGridView1.DataSource = bindingList;
@@ -276,7 +280,7 @@ namespace SensorData.Tela
         {
             try
             {
-                string url = "https://localhost:7155/v1/api/contacts";
+                string url = "http://apicheiro-dev.eba-bctbmw7j.us-east-1.elasticbeanstalk.com/v1/api/contacts";
 
                 string json = System.Text.Json.JsonSerializer.Serialize(contato);
 
@@ -355,7 +359,7 @@ namespace SensorData.Tela
 
         public async Task<bool> AtualizarContatoAsync(ContactModel contato)
         {
-            string url = $"https://localhost:7155/v1/api/contacts/{userId}/{contato.Id}";
+            string url = $"http://apicheiro-dev.eba-bctbmw7j.us-east-1.elasticbeanstalk.com/v1/api/contacts/{userId}/{contato.Id}";
 
 
 
@@ -370,7 +374,7 @@ namespace SensorData.Tela
                 };
 
                 // Serializa o objeto para JSON
-                var json = JsonSerializer.Serialize(contatoData);
+                var json = System.Text.Json.JsonSerializer.Serialize(contatoData);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 // Envia a requisição PUT para atualizar o contato
@@ -393,7 +397,7 @@ namespace SensorData.Tela
 
         public async Task<bool> DeleteAsync(int userId, int id)
         {
-            var url = $"https://localhost:7155/v1/api/contacts/{userId}/{id}";
+            var url = $"http://apicheiro-dev.eba-bctbmw7j.us-east-1.elasticbeanstalk.com/v1/api/contacts/{userId}/{id}";
 
             try
             {
@@ -445,12 +449,13 @@ namespace SensorData.Tela
         private void dataGridView2_Load(object sender, DataGridViewCellEventArgs e)
         {
             CarregarAlertas(userId).Wait();
+
         }
         private async Task CarregarAlertas(int userId)
         {
             try
             {
-                var url = $"https://localhost:7155/v1/api/alerts/{userId}";
+                var url = $"http://apicheiro-dev.eba-bctbmw7j.us-east-1.elasticbeanstalk.com/v1/api/alerts/{userId}";
 
                 using (var client = new HttpClient())
                 {
@@ -459,13 +464,23 @@ namespace SensorData.Tela
                     if (response.IsSuccessStatusCode)
                     {
                         var responseBody = response.Content.ReadAsStringAsync().Result;
-                        var alertas = JsonSerializer.Deserialize<List<AlertaModel>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        var alertas = System.Text.Json.JsonSerializer.Deserialize<List<AlertaModel>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                         // Verifica se a lista de alertas é nula ou vazia
                         if (alertas == null || !alertas.Any())
                         {
                             alertas = new List<AlertaModel>(); // Cria uma lista vazia
+
+
                         }
+
+                        // Converte o horário UTC para Brasília (GMT-3)
+                        TimeZoneInfo brasiliaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+                        foreach (var alerta in alertas)
+                        {
+                            alerta.DataHora = TimeZoneInfo.ConvertTimeFromUtc(alerta.DataHora, brasiliaTimeZone);
+                        }
+
 
                         // Atualiza o DataGrid com a lista de alertas
                         dataGridView2.DataSource = new BindingList<AlertaModel>(alertas);
@@ -493,7 +508,7 @@ namespace SensorData.Tela
             }
         }
 
-        
+
 
         private async void AdicionarAlerta()
         {
@@ -511,8 +526,92 @@ namespace SensorData.Tela
         private void button4_Click(object sender, EventArgs e)
         {
             AdicionarAlerta();
+            CriarGrafico();
+
         }
+
+        private async void CriarGrafico()
+        {
+            // Criar um novo gráfico
+            Chart chart = new Chart();
+            chart.Size = new System.Drawing.Size(300, 200); // Ajuste o tamanho conforme necessário
+
+            // Posicionar no lado direito da tabPage3
+            int xPos = tabPage3.Width - chart.Width - 10; // Margem de 20 pixels da borda
+            int yPos = (tabPage3.Height - chart.Height) / 2; // Centralizar verticalmente
+
+            chart.Location = new System.Drawing.Point(xPos, yPos);
+
+
+            // Criar a área do gráfico
+            ChartArea chartArea = new ChartArea("MainArea");
+            chart.ChartAreas.Add(chartArea);
+
+            // Criar uma série de dados
+            Series series = new Series("Alertas")
+            {
+                ChartType = SeriesChartType.Column // Tipo do gráfico
+            };
+
+            var alertas = GetAlertasAsync(userId).Result;
+
+
+            var alertasOrdenados = alertas.OrderBy(a => a.DataHora).ToList();
+
+            // Adicionar os dados ao gráfico
+            foreach (var alerta in alertasOrdenados)
+            {
+                series.Points.AddXY(alerta.DataHora.ToString("dd/MM/yyyy HH:mm"), alerta.SensorValue);
+            }
+
+            chart.Series.Add(series);
+
+            // Adicionar o gráfico à TabPage3 dentro do TabControl3
+            tabPage3.Controls.Add(chart);
+
+            tabPage3.Resize += (s, e) =>
+            {
+                chart.Location = new System.Drawing.Point(tabPage3.Width - chart.Width - 20, (tabPage3.Height - chart.Height) / 2);
+            };
+
+            // Ajustar posicionamento ao redimensionar a aba
+            tabPage3.Resize += (s, e) =>
+            {
+                chart.Location = new System.Drawing.Point(tabPage3.Width - chart.Width - 20, (tabPage3.Height - chart.Height) / 2);
+            };
+        }
+
+        private async Task<List<AlertaModel>> GetAlertasAsync(int userId)
+        {
+            try
+            {
+                // Fazendo a requisição GET para a API
+                string url = $"http://apicheiro-dev.eba-bctbmw7j.us-east-1.elasticbeanstalk.com/v1/api/alerts/{userId}";
+
+                var client = new HttpClient();
+
+                HttpResponseMessage response = client.GetAsync(url).Result;
+
+                response.EnsureSuccessStatusCode();
+
+                // Deserializando o JSON
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var alertas = JsonConvert.DeserializeObject<List<AlertaModel>>(responseBody);
+
+                return alertas;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao obter dados da API: {ex.Message}");
+                return new List<AlertaModel>(); // Retorna uma lista vazia em caso de erro
+            }
+        }
+
+        
     }
 }
+        
+    
+
     
 

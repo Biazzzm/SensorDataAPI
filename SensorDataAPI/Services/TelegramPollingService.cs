@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
-using Microsoft.Extensions.Hosting;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Text.Json;
+
 
 namespace SensorDataAPI.Services
 {
@@ -11,43 +9,75 @@ namespace SensorDataAPI.Services
         private readonly TelegramService _telegramService;
         private readonly string _botToken = "7810065799:AAGmfARU101WuwJ6M8CPmJ_0hdhcfv-psK8";
 
-        public TelegramPollingService(TelegramService telegramService)
+        public TelegramPollingService(TelegramService telegramservice)
         {
-            _telegramService = telegramService;
+            _telegramService = telegramservice;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public class Update
         {
-            int lastUpdateId = 0;
+            public int UpdateId { get; set; }
+            public Message Message { get; set; }
+        }
 
-            while (!stoppingToken.IsCancellationRequested)
+        public class Message
+        {
+            public Chat Chat { get; set; }
+            public string Text { get; set; }
+        }
+
+        public class Chat
+        {
+            public long Id { get; set; }
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingtoken)
+        {
+            try
             {
-                using HttpClient client = new HttpClient();
-                var url = $"https://api.telegram.org/bot{_botToken}/getUpdates?offset={lastUpdateId + 1}";
-                var response = await client.GetStringAsync(url);
+                int lastupdateid = 0;
 
-                var updates = JObject.Parse(response)["result"];
-
-                foreach (var update in updates)
+                while (!stoppingtoken.IsCancellationRequested)
                 {
-                    var message = update["message"];
-                    if (message != null)
+
+                    using HttpClient client = new HttpClient();
+                    var url = $"https://api.telegram.org/bot{_botToken}/getupdates?offset={lastupdateid + 1}";
+
+                    var response = await client.GetStringAsync(url);
+
+                    var updatesResponse = JsonSerializer.Deserialize<JsonElement>(response);
+
+                    var updates = updatesResponse.GetProperty("result").EnumerateArray();
+
+                    foreach (var update in updates)
                     {
-                        long chatId = message["chat"]["id"].Value<long>();
-                        string text = message["text"].Value<string>();
+                        var message = update.GetProperty("message");
+                        if (message.ValueKind != JsonValueKind.Null)
+                        {
+                            long chatId = message.GetProperty("chat").GetProperty("id").GetInt64();
+                            string text = message.GetProperty("text").GetString();
 
-                        // Exibe o chatId no console para facilitar o teste
-                        Console.WriteLine($"Novo chatId capturado: {chatId}");
+                            // Exibe o chatId no console para facilitar o teste
+                            Console.WriteLine($"Novo chatId capturado: {chatId}");
 
-                        // Chama o método para tratar o comando
-                        await _telegramService.HandleCommandAsync(text, chatId);
+                            // Chama o método para tratar o comando
+                            await _telegramService.HandleCommandAsync(text, chatId);
+                        }
+
+                        lastupdateid = update.GetProperty("update_id").GetInt32();
                     }
 
-                    lastUpdateId = update["update_id"].Value<int>();
+                    await Task.Delay(1000); // evita sobrecarregar o servidor
                 }
 
-                await Task.Delay(1000); // Evita sobrecarregar o servidor
             }
+            catch (Exception ex)
+            {
+
+            }
+            
         }
     }
 }
+
+

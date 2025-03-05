@@ -32,13 +32,16 @@ namespace SensorDataAPI.Controllers
 
         [HttpPost]
         [Route("api/sensordata/post-sensor-data/{email}")]
-        public async Task<IActionResult> Post([FromRoute] string email, [FromBody] SensorModel data, [FromServices] SensorDBcontext _context, [FromServices] EmailService _emailService)
+        public async Task<IActionResult> Post(
+    [FromRoute] string email,
+    [FromBody] SensorModel data,
+    [FromServices] SensorDBcontext _context,
+    [FromServices] EmailService _emailService)
         {
             try
             {
-                // Carrega o usuário e seus contatos de emergência
                 var user = await _context.Users
-                    .Include(u => u.ContactsList) // Carrega os contatos de emergência
+                    .Include(u => u.ContactsList)
                     .FirstOrDefaultAsync(u => u.Email == email);
 
                 if (user == null)
@@ -50,30 +53,57 @@ namespace SensorDataAPI.Controllers
                 data.User = user;
                 data.UserId = userId;
 
-                if (data.SensorValue > 400)
+                if (string.IsNullOrEmpty(data.SensorType))
                 {
+                    return BadRequest("O tipo de sensor não foi informado.");
+                }
+
+               
+                // Definir os limites para os sensores MQ-2 e MQ-4
+                int mq2Threshold = 400;  // Limite para MQ-2
+                int mq4Threshold = 400;  // Limite para MQ-4
+
+                bool alertTriggered = false;
+
+                
+
+                // Verificar o valor do sensor com base no tipo
+                if (data.SensorType == "MQ-2" && data.SensorValue > mq2Threshold)
+                {
+                    alertTriggered = true;
+                }
+                else if (data.SensorType == "MQ-4" && data.SensorValue > mq4Threshold)
+                {
+                    alertTriggered = true;
+                }
+
+                // Se algum sensor disparou alerta, enviar o alerta
+                if (alertTriggered)
+                {
+                    // Verificar se o tempo de cooldown foi respeitado
                     if (DateTime.Now - _lastAlertTime > CooldownPeriod)
                     {
                         var alerta = new AlertaModel
                         {
                             SensorValue = data.SensorValue,
                             DataHora = DateTime.UtcNow,
-                            UserId = userId
+                            UserId = user.Id,
+                            SensorType = data.SensorType // Armazenando qual sensor disparou o alerta
                         };
 
                         _context.Alertas.Add(alerta);
                         await _context.SaveChangesAsync();
 
-                        var message = @$"🚨 Alerta de Gás ou Fumaça Detectada!
+                        var message = @$"🚨 Alerta de {data.SensorType} Detectado!
 
-Olá {user.Name}, 
-
-Detectamos um nível de gás ou fumaça em sua área. Sua segurança é nossa prioridade!
+Nível crítico detectado: {data.SensorValue}.
+                        
+Olá {user.Name}, Detectamos um nível de gás ou fumaça em sua área. Sua segurança é nossa prioridade!
 
 Deseja ligar para os serviços de emergência? Aqui estão os números:
 
-Polícia: 190  
-Bombeiros: 193  
+Polícia: 190
+Bombeiros: 193
 
 Por favor, se sentir que está em risco, entre em contato imediatamente com os serviços de emergência.
 
@@ -87,11 +117,9 @@ Fique seguro(a)!";
 
                         await _telegramService.SendAlertMessageAsync(message, chatIds);
 
-                        // Prepara a lista de usuários e contatos
                         var users = new List<UserModel> { user };
                         var contacts = user.ContactsList?.ToList() ?? new List<ContactModel>();
 
-                        // Envia o e-mail para todos os destinatários
                         await _emailService.SendEmailAsync(users, contacts, "🚨 Alerta de Gás ou Fumaça Detectada!", message);
 
                         _lastAlertTime = DateTime.Now;
@@ -105,7 +133,7 @@ Fique seguro(a)!";
                 }
                 else
                 {
-                    return Ok(new { status = "Valor do sensor não crítico, dados não salvos." });
+                    return Ok(new { status = "Nenhum valor crítico detectado. Dados não salvos." });
                 }
             }
             catch (Exception ex)
@@ -113,6 +141,7 @@ Fique seguro(a)!";
                 return BadRequest("Erro ao processar dados: " + ex.Message);
             }
         }
+
     }
 }
 

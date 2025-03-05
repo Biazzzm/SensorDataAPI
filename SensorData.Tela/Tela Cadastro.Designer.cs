@@ -162,7 +162,7 @@
             Controls.Add(button1);
             Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             Name = "TelaCadastro";
-            Text = "Cheiro de Fumaça";
+            Text = "Cheiro de Problema";
             ResumeLayout(false);
             PerformLayout();
         }

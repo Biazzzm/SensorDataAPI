@@ -47,12 +47,13 @@
             label1 = new Label();
             dataGridView1 = new DataGridView();
             tabPage3 = new TabPage();
+            button4 = new Button();
             dataGridView2 = new DataGridView();
             sqlCommand1 = new Microsoft.Data.SqlClient.SqlCommand();
             sqlCommand2 = new Microsoft.Data.SqlClient.SqlCommand();
             sqlCommand3 = new Microsoft.Data.SqlClient.SqlCommand();
             sqlCommand4 = new Microsoft.Data.SqlClient.SqlCommand();
-            button4 = new Button();
+            sqlCommand5 = new Microsoft.Data.SqlClient.SqlCommand();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -257,6 +258,16 @@
             tabPage3.Text = "Alertas e Incidentes";
             tabPage3.UseVisualStyleBackColor = true;
             // 
+            // button4
+            // 
+            button4.Location = new Point(298, 6);
+            button4.Name = "button4";
+            button4.Size = new Size(75, 23);
+            button4.TabIndex = 1;
+            button4.Text = "Atualizar Alertas";
+            button4.UseVisualStyleBackColor = true;
+            button4.Click += button4_Click;
+            // 
             // dataGridView2
             // 
             dataGridView2.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -285,15 +296,10 @@
             sqlCommand4.CommandTimeout = 30;
             sqlCommand4.EnableOptimizedParameterBinding = false;
             // 
-            // button4
+            // sqlCommand5
             // 
-            button4.Location = new Point(298, 6);
-            button4.Name = "button4";
-            button4.Size = new Size(75, 23);
-            button4.TabIndex = 1;
-            button4.Text = "Atualizar Alertas";
-            button4.UseVisualStyleBackColor = true;
-            button4.Click += button4_Click;
+            sqlCommand5.CommandTimeout = 30;
+            sqlCommand5.EnableOptimizedParameterBinding = false;
             // 
             // SistemaForm
             // 
@@ -302,7 +308,7 @@
             ClientSize = new Size(922, 511);
             Controls.Add(tabControl1);
             Name = "SistemaForm";
-            Text = "CheiroDeFumaça";
+            Text = "Cheiro de Problema";
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
@@ -341,5 +347,6 @@
         private Button button2;
         private Button button3;
         private Button button4;
+        private Microsoft.Data.SqlClient.SqlCommand sqlCommand5;
     }
 }
