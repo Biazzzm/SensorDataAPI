@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using SensorData.Data;
 using SensorData.Models;
 using SensorDataAPI.Services;
-using Telegram.Bot.Types;
 
 namespace SensorDataAPI.Controllers
 {
@@ -16,11 +15,13 @@ namespace SensorDataAPI.Controllers
         private static readonly TimeSpan CooldownPeriod = TimeSpan.FromMinutes(5); // Período de cooldown para novos alertas
         private readonly SensorDBcontext _context;
         private readonly EmailService _emailService;
-        public SensorDataController(SensorDBcontext context, EmailService emailService)
+        private readonly ILogger<SensorDataController> _logger;
+        public SensorDataController(SensorDBcontext context, EmailService emailService, ILogger<SensorDataController> logger)
         {
             _telegramService = new TelegramService();
             _context = context;
             _emailService = emailService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -58,14 +59,14 @@ namespace SensorDataAPI.Controllers
                     return BadRequest("O tipo de sensor não foi informado.");
                 }
 
-               
+
                 // Definir os limites para os sensores MQ-2 e MQ-4
                 int mq2Threshold = 400;  // Limite para MQ-2
                 int mq4Threshold = 400;  // Limite para MQ-4
 
                 bool alertTriggered = false;
 
-                
+
 
                 // Verificar o valor do sensor com base no tipo
                 if (data.SensorType == "MQ-2" && data.SensorValue > mq2Threshold)
@@ -138,6 +139,7 @@ Fique seguro(a)!";
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao receber a leitura de gas");
                 return BadRequest("Erro ao processar dados: " + ex.Message);
             }
         }
