@@ -96,19 +96,18 @@ namespace SensorDataAPI.Controllers
 
                         var message = @$"🚨 Alerta de {data.SensorType} Detectado!
 
-                        Nível crítico detectado: {data.SensorValue}.
+Nível crítico detectado: {data.SensorValue}.
                         
-                        Olá {user.Name}, Detectamos um nível de gás ou fumaça em sua área. Sua segurança é nossa prioridade!
+Olá {user.Name}, Detectamos um nível de gás ou fumaça em sua área. Sua segurança é nossa prioridade!
 
+Deseja ligar para os serviços de emergência? Aqui estão os números:
 
-                        Deseja ligar para os serviços de emergência? Aqui estão os números:
+Polícia: 190
+Bombeiros: 193
 
-                        Polícia: 190
-                        Bombeiros: 193
+Por favor, se sentir que está em risco, entre em contato imediatamente com os serviços de emergência.
 
-                        Por favor, se sentir que está em risco, entre em contato imediatamente com os serviços de emergência.
-
-                        Fique seguro(a)!";
+Fique seguro(a)!";
 
                         var chatIds = new List<string> { user.ChatId };
                         if (user.ContactsList != null)

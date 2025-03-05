@@ -6,6 +6,7 @@ using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.IO.Ports;
 
 namespace SensorData.Tela
 {
@@ -13,6 +14,7 @@ namespace SensorData.Tela
     {
         private int userId;
         private string passwordLogin;
+       
 
         public SistemaForm(int userId, string passwordLogin)
         {
@@ -24,8 +26,14 @@ namespace SensorData.Tela
             senhaCheckBox1.CheckedChanged += senhaCheckBox1_CheckedChanged;
             Console.WriteLine($"userId recebido: {userId}\n senha recebida: {passwordLogin}");
             CarregarContatosEmergencia(userId);
-            
+           
+
         }
+
+        
+
+
+
         private void CarregarUsuario()
         {
             try
@@ -463,7 +471,7 @@ namespace SensorData.Tela
                         {
                             alertas = new List<AlertaModel>(); // Cria uma lista vazia
 
-                            
+
                         }
 
                         // Converte o horário UTC para Brasília (GMT-3)
@@ -500,7 +508,7 @@ namespace SensorData.Tela
             }
         }
 
-        
+
 
         private async void AdicionarAlerta()
         {
@@ -519,6 +527,7 @@ namespace SensorData.Tela
         {
             AdicionarAlerta();
             CriarGrafico();
+
         }
 
         private async void CriarGrafico()
@@ -526,7 +535,7 @@ namespace SensorData.Tela
             // Criar um novo gráfico
             Chart chart = new Chart();
             chart.Size = new System.Drawing.Size(300, 200); // Ajuste o tamanho conforme necessário
-            
+
             // Posicionar no lado direito da tabPage3
             int xPos = tabPage3.Width - chart.Width - 10; // Margem de 20 pixels da borda
             int yPos = (tabPage3.Height - chart.Height) / 2; // Centralizar verticalmente
@@ -560,12 +569,14 @@ namespace SensorData.Tela
             // Adicionar o gráfico à TabPage3 dentro do TabControl3
             tabPage3.Controls.Add(chart);
 
-            tabPage3.Resize += (s, e) => {
+            tabPage3.Resize += (s, e) =>
+            {
                 chart.Location = new System.Drawing.Point(tabPage3.Width - chart.Width - 20, (tabPage3.Height - chart.Height) / 2);
             };
 
             // Ajustar posicionamento ao redimensionar a aba
-            tabPage3.Resize += (s, e) => {
+            tabPage3.Resize += (s, e) =>
+            {
                 chart.Location = new System.Drawing.Point(tabPage3.Width - chart.Width - 20, (tabPage3.Height - chart.Height) / 2);
             };
         }
@@ -595,7 +606,8 @@ namespace SensorData.Tela
                 return new List<AlertaModel>(); // Retorna uma lista vazia em caso de erro
             }
         }
-       
+
+        
     }
 }
         

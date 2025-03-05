@@ -308,7 +308,7 @@
             ClientSize = new Size(922, 511);
             Controls.Add(tabControl1);
             Name = "SistemaForm";
-            Text = "CheiroDeFumaça";
+            Text = "Cheiro de Problema";
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
