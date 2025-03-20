@@ -1,6 +1,6 @@
 # SensorDataAPI
 
-Este repositório contém a API que recebe e processa dados do sensor MQ-2, incluindo informações de gás e fumaça enviadas por dispositivos Arduino. A API é responsável por registrar os dados enviados pelo sensor, bem como associar essas informações ao e-mail do usuário para rastreamento e notificações.
+Este repositório contém a API que recebe e processa dados dos sensores MQ-2 e MQ-4 , incluindo informações de gás e fumaça enviadas por dispositivos Arduino. A API é responsável por registrar os dados enviados pelo sensor, bem como associar essas informações ao e-mail do usuário para rastreamento e notificações.
 
 ## Funcionalidades
 
