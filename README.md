@@ -4,7 +4,8 @@ Este repositório contém a API que recebe e processa dados dos sensores MQ-2 e 
 
 ## Funcionalidades
 
-- **Recebe Dados de Sensores**: A API recebe dados do sensor MQ-2 (gás e fumaça) enviados pelo Arduino, junto com o e-mail do usuário.
+- **Recebe Dados de Sensores**: A API recebe dados do sensor MQ-2 (gás e fumaça) e MQ-4(
+-  enviados pelo Arduino, junto com o e-mail do usuário.
 - **Armazenamento e Processamento**: A API armazena os dados no banco de dados em memória e realiza o processamento necessário para a geração de alertas ou registros.
 - **Notificação**: Possibilidade de enviar notificações para o usuário caso um valor crítico de sensor seja detectado.
 - **Integração com o Sistema de Lâmpadas**: Integra-se ao sistema de lâmpadas Yeelight, alterando as cores em resposta aos dados recebidos do sensor.
