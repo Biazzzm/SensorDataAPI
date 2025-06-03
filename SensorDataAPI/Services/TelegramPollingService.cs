@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 
 namespace SensorDataAPI.Services
@@ -8,10 +7,12 @@ namespace SensorDataAPI.Services
     {
         private readonly TelegramService _telegramService;
         private readonly string _botToken = "7810065799:AAGmfARU101WuwJ6M8CPmJ_0hdhcfv-psK8";
+        private readonly ILogger<TelegramPollingService> _logger;
 
-        public TelegramPollingService(TelegramService telegramservice)
+        public TelegramPollingService(ILogger<TelegramPollingService> logger, TelegramService telegramservice)
         {
             _telegramService = telegramservice;
+            _logger = logger;
         }
 
         public class Update
@@ -73,9 +74,9 @@ namespace SensorDataAPI.Services
             }
             catch (Exception ex)
             {
-
+                _logger.LogError(ex, "Erro no polling telegram");
             }
-            
+
         }
     }
 }

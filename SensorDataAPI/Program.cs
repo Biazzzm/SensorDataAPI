@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SendGrid.Helpers.Mail;
 using SensorDataAPI.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +31,11 @@ builder.Services.AddSingleton<TelegramService>();
 
 builder.Services.AddHostedService<TelegramPollingService>();
 
-//Configuração do EmailService
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog(); 
 
 
 var app = builder.Build();
