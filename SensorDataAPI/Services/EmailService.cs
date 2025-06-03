@@ -2,9 +2,6 @@
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using SensorData.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Telegram.Bot.Types;
 
 namespace SensorDataAPI.Services
 {
@@ -32,17 +29,15 @@ namespace SensorDataAPI.Services
                     PlainTextContent = body // Usa o conteúdo diretamente (sem template)
                 };
 
-                // Adiciona os usuários como destinatários
-                foreach (var user in users)
-                {
-                    msg.AddTo(new EmailAddress(user.Email, user.Name));
-                }
+                // Junta todos os destinatários (users + contacts)
+                var recipients = users
+                    .Select(u => new EmailAddress(u.Email, u.Name))
+                    .Concat(contacts.Select(c => new EmailAddress(c.Email, c.Name)))
+                    .ToList();
 
-                // Adiciona os contatos de emergência como destinatários
-                foreach (var contact in contacts)
-                {
-                    msg.AddTo(new EmailAddress(contact.Email, contact.Name));
-                }
+                // Adiciona todos os destinatários de uma vez
+                msg.AddTos(recipients);
+
 
                 // Envia o e-mail
                 var response = await client.SendEmailAsync(msg);
