@@ -5,7 +5,7 @@ namespace SensorDataAPI.Services
 {
     public class TelegramService
     {
-        private readonly string _botToken = "7810065799:AAGmfARU101WuwJ6M8CPmJ_0hdhcfv-psK8";
+        private readonly string _botToken = "TOKEN";
         
 
         private readonly TelegramBotClient _botClient;
