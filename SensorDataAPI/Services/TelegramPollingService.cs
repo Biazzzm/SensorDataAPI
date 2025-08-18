@@ -6,7 +6,7 @@ namespace SensorDataAPI.Services
     public class TelegramPollingService : BackgroundService
     {
         private readonly TelegramService _telegramService;
-        private readonly string _botToken = "7810065799:AAGmfARU101WuwJ6M8CPmJ_0hdhcfv-psK8";
+        private readonly string _botToken = "TOKEN";
         private readonly ILogger<TelegramPollingService> _logger;
 
         public TelegramPollingService(ILogger<TelegramPollingService> logger, TelegramService telegramservice)
